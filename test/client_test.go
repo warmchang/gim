@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"testing"
 	"time"
@@ -22,6 +23,7 @@ func TestClient(t *testing.T) {
 	connect(3, 3)
 
 	time.Sleep(2 * time.Second)
+	fmt.Println()
 	reply, err := getMessageIntClient().PushToUsers(context.TODO(), &pb.PushToUsersRequest{
 		UserIds:   []uint64{1},
 		Command:   connectpb.MessageCommand_MC_USER_MESSAGE,
@@ -34,6 +36,7 @@ func TestClient(t *testing.T) {
 	slog.Info("私聊发送", "MessageID", reply.MessageId)
 
 	time.Sleep(1 * time.Second)
+	fmt.Println()
 	groupReply, err := getGroupIntClient().Push(context.TODO(), &pb.GroupPushRequest{
 		GroupId:   1,
 		Command:   connectpb.MessageCommand_MC_GROUP_MESSAGE,
@@ -45,6 +48,8 @@ func TestClient(t *testing.T) {
 	}
 	slog.Info("群组发送成功", "MessageID", groupReply.MessageId)
 
+	time.Sleep(1 * time.Second)
+	fmt.Println()
 	_, err = getRoomIntClient().PushRoom(context.TODO(), &pb.PushRoomRequest{
 		RoomId:     1,
 		Command:    10000,
