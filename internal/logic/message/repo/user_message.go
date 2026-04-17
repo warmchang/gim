@@ -3,6 +3,8 @@ package repo
 import (
 	"context"
 
+	"gorm.io/gorm"
+
 	"gim/internal/logic/message/domain"
 	"gim/pkg/db"
 )
@@ -11,14 +13,8 @@ var UserMessageRepo = new(userMessageRepo)
 
 type userMessageRepo struct{}
 
-// Create 创建
-func (*userMessageRepo) Create(ctx context.Context, message *domain.UserMessage) error {
-	seq, err := SeqRepo.Incr(ctx, message.UserID)
-	if err != nil {
-		return err
-	}
-	message.Seq = seq
-	return db.DB.WithContext(ctx).Create(&message).Error
+func (*userMessageRepo) BatchCreate(ctx context.Context, messages []*domain.UserMessage) error {
+	return gorm.G[*domain.UserMessage](db.DB).CreateInBatches(ctx, &messages, 50)
 }
 
 // ListBySeq 根据类型和id查询大于序号大于seq的消息

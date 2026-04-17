@@ -12,7 +12,8 @@ type UserMessage struct {
 	CreatedAt time.Time // 创建时间
 	UpdatedAt time.Time // 更新时间
 	MessageID uint64    // 消息ID
-	Message   Message   `gorm:"->"` // 消息
+
+	Message Message `gorm:"->"` // 消息
 }
 
 func (m *UserMessage) MessageToPB() *connectpb.Message {

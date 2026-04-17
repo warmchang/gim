@@ -7,16 +7,12 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"gim/config"
-	deviceapp "gim/internal/logic/device/app"
-	devicedomain "gim/internal/logic/device/domain"
 	"gim/internal/logic/message/domain"
 	"gim/internal/logic/message/repo"
 	"gim/pkg/md"
 	"gim/pkg/mq"
 	"gim/pkg/protocol/pb/connectpb"
 	pb "gim/pkg/protocol/pb/logicpb"
-	"gim/pkg/rpc"
 )
 
 const pageSize = 50 // 最大消息同步数量
@@ -28,86 +24,18 @@ type messageApp struct{}
 // PushToUsers 发送消息
 func (a *messageApp) PushToUsers(ctx context.Context, userIDs []uint64, message *connectpb.Message, isPersist bool) (uint64, error) {
 	message.CreatedAt = time.Now().Unix()
-	slog.Debug("SendToUser", "request_id", md.GetRequestID(ctx), "to_user_ids", userIDs)
+	slog.Debug("PushToUsers", "request_id", md.GetRequestID(ctx), "to_user_ids", userIDs)
 
-	var messageID uint64
-	if isPersist {
-		msg := domain.Message{
-			RequestID: md.GetRequestID(ctx),
-			Command:   message.Command,
-			Content:   message.Content,
-			CreatedAt: time.Unix(message.CreatedAt, 0),
-		}
-		err := repo.MessageRepo.Save(ctx, &msg)
-		if err != nil {
-			return 0, err
-		}
-		messageID = msg.ID
-	}
-
-	for _, userID := range userIDs {
-		msg := &connectpb.Message{
-			Command:   message.Command,
-			Content:   message.Content,
-			CreatedAt: message.CreatedAt,
-		}
-		err := a.PushToUser(ctx, userID, messageID, msg, isPersist)
-		if err != nil {
-			slog.Error("PushToUser", "error", err, "userID", userID)
-		}
-	}
-	return messageID, nil
-}
-
-func (a *messageApp) PushToUser(ctx context.Context, userID, messageID uint64, message *connectpb.Message, isPersist bool) error {
-	slog.Debug("PushToUser", "userID", userID, "messageID", messageID, "message", message)
-
-	if isPersist {
-		userMessage := domain.UserMessage{
-			UserID:    userID,
-			MessageID: messageID,
-		}
-
-		err := repo.UserMessageRepo.Create(ctx, &userMessage)
-		if err != nil {
-			return err
-		}
-		message.Seq = userMessage.Seq
-	}
-
-	devices, err := deviceapp.DeviceApp.ListByUserID(ctx, userID)
+	dispatcher := newDispatcher(ctx, message, isPersist, userIDs)
+	err := dispatcher.dispatch()
 	if err != nil {
-		return err
+		return 0, err
 	}
-
-	for i := range devices {
-		err = a.PushToDevice(ctx, &devices[i], message)
-		if err != nil {
-			return err
-		}
+	err = dispatcher.flush()
+	if err != nil {
+		return 0, err
 	}
-	return nil
-}
-
-func (a *messageApp) PushToDevice(ctx context.Context, device *devicedomain.Device, message *connectpb.Message) error {
-	slog.Debug("PushToDevice", "device", device, "message", message)
-	if device.Status == devicedomain.StatusOnline {
-		request := &connectpb.PushToDevicesRequest{
-			DeviceMessages: []*connectpb.DeviceMessage{
-				{
-					DeviceId: device.ID,
-					Message:  message,
-				},
-			},
-		}
-
-		addr := device.ConnectIP + config.GrpcListenAddr
-		_, err := rpc.GetConnectIntClient(addr).PushToDevices(ctx, request)
-		return err
-	}
-
-	// 离线推送
-	return nil
+	return dispatcher.messageID, nil
 }
 
 // PushToAll 全服推送
