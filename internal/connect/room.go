@@ -20,17 +20,15 @@ func SubscribedRoom(conn *Conn, roomID uint64) {
 	// 取消订阅
 	if oldRoomID != 0 {
 		value, ok := RoomsManager.Load(oldRoomID)
-		if !ok {
-			return
-		}
-		room := value.(*Room)
-		room.Unsubscribe(conn)
+		if ok {
+			room := value.(*Room)
+			room.Unsubscribe(conn)
 
-		if room.Conns.Front() == nil {
-			RoomsManager.Delete(oldRoomID)
+			if room.Conns.Front() == nil {
+				RoomsManager.Delete(oldRoomID)
+			}
+			slog.Debug("SubscribedRoom un", "userID", conn.UserID, "roomID", roomID)
 		}
-		slog.Debug("SubscribedRoom un", "userID", conn.UserID, "roomID", roomID)
-		return
 	}
 
 	// 订阅

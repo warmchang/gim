@@ -264,7 +264,6 @@ func setContent(packet *pb.Packet, err error, message proto.Message) {
 		if err != nil {
 			slog.Error("setContent error", "error", err)
 		}
-		return
 	}
 
 	buf, err := proto.Marshal(&reply)

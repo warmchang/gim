@@ -15,7 +15,7 @@ type deviceACKRepo struct{}
 var DeviceACKRepo = new(deviceACKRepo)
 
 // Set 设置设备同步序列号
-func (c *deviceACKRepo) Set(ctx context.Context, userID, deviceID, ack uint64) error {
+func (*deviceACKRepo) Set(ctx context.Context, userID, deviceID, ack uint64) error {
 	deviceACK := &domain.DeviceACK{
 		DeviceID: deviceID,
 		UserID:   userID,
@@ -26,6 +26,6 @@ func (c *deviceACKRepo) Set(ctx context.Context, userID, deviceID, ack uint64) e
 	}).Create(deviceACK).Error
 }
 
-func (c *deviceACKRepo) List(ctx context.Context, userID uint64) ([]domain.DeviceACK, error) {
+func (*deviceACKRepo) List(ctx context.Context, userID uint64) ([]domain.DeviceACK, error) {
 	return gorm.G[domain.DeviceACK](db.DB).Where("user_id = ?", userID).Find(ctx)
 }

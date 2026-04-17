@@ -135,24 +135,6 @@ PARTITIONS 8 */;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `seq`
---
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `seq` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `created_at` datetime NOT NULL COMMENT '创建时间',
-  `updated_at` datetime NOT NULL COMMENT '更新时间',
-  `object_type` tinyint NOT NULL COMMENT '对象类型,1:用户；2：群组',
-  `object_id` bigint unsigned NOT NULL COMMENT '对象id',
-  `seq` bigint unsigned NOT NULL COMMENT '序列号',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_object` (`object_type`,`object_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='序列号';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `user`
 --
 

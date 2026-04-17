@@ -20,17 +20,14 @@ func (m *UserMessage) MessageToPB() *connectpb.Message {
 		Command:   m.Message.Command,
 		Content:   m.Message.Content,
 		Seq:       m.Seq,
-		CreatedAt: time.Now().Unix(),
+		CreatedAt: m.Message.CreatedAt.Unix(),
 	}
 }
 
 func MessagesToPB(messages []UserMessage) []*connectpb.Message {
 	pbMessages := make([]*connectpb.Message, 0, len(messages))
 	for i := range messages {
-		pbMessage := messages[i].MessageToPB()
-		if pbMessages != nil {
-			pbMessages = append(pbMessages, pbMessage)
-		}
+		pbMessages = append(pbMessages, messages[i].MessageToPB())
 	}
 	return pbMessages
 }

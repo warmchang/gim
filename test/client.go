@@ -230,7 +230,7 @@ func (c *client) heartbeat() {
 
 func (c *client) subscribeRoom() {
 	var roomID uint64 = 1
-	c.send(connectpb.PacketCommand_PC_SUBSCRIBE_ROOM, getRequestID(), &logicpb.SubscribeRoomRequest{
+	c.send(connectpb.PacketCommand_PC_SUBSCRIBE_ROOM, getRequestID(), &connectpb.SubscribeRoomRequest{
 		RoomId: roomID,
 	})
 	c.log.Info("订阅房间", "roomID", roomID)

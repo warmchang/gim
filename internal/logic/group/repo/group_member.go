@@ -18,7 +18,7 @@ type groupMemberRepo struct{}
 
 var GroupMemberRepo groupMemberRepo
 
-func (r *groupMemberRepo) ListByGroupID(ctx context.Context, groupID uint64) ([]domain.GroupMember, error) {
+func (*groupMemberRepo) ListByGroupID(ctx context.Context, groupID uint64) ([]domain.GroupMember, error) {
 	key := fmt.Sprintf(GroupMemberKey, groupID)
 	result, err := uredis.Get(db.RedisCli, ctx, key, 24*time.Hour, func() (*[]domain.GroupMember, error) {
 		members, err := gorm.G[domain.GroupMember](db.DB).Where("group_id = ?", groupID).Find(ctx)

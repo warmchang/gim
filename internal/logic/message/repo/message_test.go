@@ -16,9 +16,3 @@ func Test_messageRepo_Save(t *testing.T) {
 	err := MessageRepo.Save(context.Background(), &msg)
 	t.Log(err)
 }
-
-func Test_messageRepo_GetByIDs(t *testing.T) {
-	msgs, err := MessageRepo.GetByIDs(context.Background(), []int64{1})
-	t.Log(err)
-	t.Log(msgs)
-}

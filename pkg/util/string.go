@@ -2,15 +2,8 @@ package util
 
 import (
 	"math/rand"
-	"time"
 	"unsafe"
 )
-
-var r *rand.Rand
-
-func init() {
-	r = rand.New(rand.NewSource(time.Now().Unix()))
-}
 
 func Str2bytes(s string) []byte {
 	x := (*[2]uintptr)(unsafe.Pointer(&s))
@@ -26,7 +19,7 @@ func Bytes2str(b []byte) string {
 func RandString(len int) string {
 	bytes := make([]byte, len)
 	for i := 0; i < len; i++ {
-		b := r.Intn(26) + 65
+		b := rand.Intn(26) + 65
 		bytes[i] = byte(b)
 	}
 	return string(bytes)

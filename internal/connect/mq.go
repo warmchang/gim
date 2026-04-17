@@ -3,7 +3,6 @@ package connect
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
@@ -30,18 +29,16 @@ func StartSubscribe() {
 
 func handlePushRoomMsg(priorityChannel, channel <-chan *redis.Message) {
 	for {
+		var msg *redis.Message
 		select {
-		case msg := <-priorityChannel:
-			handlePushRoom([]byte(msg.Payload))
+		case msg = <-priorityChannel:
 		default:
 			select {
-			case msg := <-channel:
-				handlePushRoom([]byte(msg.Payload))
-			default:
-				time.Sleep(100 * time.Millisecond)
-				continue
+			case msg = <-priorityChannel:
+			case msg = <-channel:
 			}
 		}
+		handlePushRoom([]byte(msg.Payload))
 	}
 }
 

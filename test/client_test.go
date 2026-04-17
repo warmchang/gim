@@ -45,6 +45,18 @@ func TestClient(t *testing.T) {
 	}
 	slog.Info("群组发送成功", "MessageID", groupReply.MessageId)
 
+	_, err = getRoomIntClient().PushRoom(context.TODO(), &pb.PushRoomRequest{
+		RoomId:     1,
+		Command:    10000,
+		Content:    []byte("hello gim from room"),
+		SendTime:   time.Now().Unix(),
+		IsPriority: false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	slog.Info("房间发送成功")
+
 	select {}
 }
 
@@ -62,4 +74,12 @@ func getGroupIntClient() pb.GroupIntServiceClient {
 		panic(err)
 	}
 	return pb.NewGroupIntServiceClient(conn)
+}
+
+func getRoomIntClient() pb.RoomIntServiceClient {
+	conn, err := grpc.NewClient(logicServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	return pb.NewRoomIntServiceClient(conn)
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
+	"io"
 )
 
 func GetUvarintLen(x uint64) int {
@@ -31,7 +32,7 @@ func Decode(reader *bufio.Reader) ([]byte, error) {
 	}
 
 	buf := make([]byte, length)
-	n, err := reader.Read(buf)
+	n, err := io.ReadFull(reader, buf)
 	if err != nil {
 		return nil, err
 	}

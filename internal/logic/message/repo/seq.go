@@ -2,8 +2,7 @@ package repo
 
 import (
 	"context"
-
-	"gorm.io/gorm"
+	"fmt"
 
 	"gim/pkg/db"
 )
@@ -17,23 +16,11 @@ type seqRepo struct{}
 var SeqRepo = new(seqRepo)
 
 // Incr 自增seq,并且获取自增后的值
-func (*seqRepo) Incr(ctx context.Context, objectType int, objectID uint64) (uint64, error) {
-	var seq uint64
-	err := db.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// UPSERT: 插入或更新
-		err := tx.Exec(
-			"INSERT INTO seq (object_type, object_id, seq) VALUES (?, ?, 1) "+
-				"ON DUPLICATE KEY UPDATE seq = seq + 1",
-			objectType, objectID).Error
-		if err != nil {
-			return err
-		}
-		// 在同一事务中查询当前值
-		return tx.Raw("SELECT seq FROM seq WHERE object_type = ? AND object_id = ?",
-			objectType, objectID).Row().Scan(&seq)
-	})
+func (*seqRepo) Incr(ctx context.Context, userID uint64) (uint64, error) {
+	key := fmt.Sprintf("seq:%d", userID)
+	val, err := db.RedisCli.Incr(ctx, key).Result()
 	if err != nil {
 		return 0, err
 	}
-	return seq, nil
+	return uint64(val), nil
 }

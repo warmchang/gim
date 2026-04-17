@@ -12,8 +12,8 @@ var UserMessageRepo = new(userMessageRepo)
 type userMessageRepo struct{}
 
 // Create 创建
-func (d *userMessageRepo) Create(ctx context.Context, message *domain.UserMessage) error {
-	seq, err := SeqRepo.Incr(ctx, SeqObjectTypeUser, message.UserID)
+func (*userMessageRepo) Create(ctx context.Context, message *domain.UserMessage) error {
+	seq, err := SeqRepo.Incr(ctx, message.UserID)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func (d *userMessageRepo) Create(ctx context.Context, message *domain.UserMessag
 }
 
 // ListBySeq 根据类型和id查询大于序号大于seq的消息
-func (d *userMessageRepo) ListBySeq(ctx context.Context, userId, seq uint64, limit int64) ([]domain.UserMessage, bool, error) {
+func (*userMessageRepo) ListBySeq(ctx context.Context, userId, seq uint64, limit int64) ([]domain.UserMessage, bool, error) {
 	var messages []domain.UserMessage
 	limitint := int(limit)
 	err := db.DB.WithContext(ctx).Table("user_message").
